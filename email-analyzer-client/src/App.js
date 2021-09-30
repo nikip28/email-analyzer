@@ -20,7 +20,7 @@ function App() {
   const getSnippets = (code) => {
     let url = API_ENDPOINT;
     if (code) {
-      url = url + `/?code=${code}`;
+      url = url + `?code=${code}`;
     }
     setLoader(true);
     fetch(url)
@@ -46,13 +46,15 @@ function App() {
       {loader ? (
         <div>Loading...</div>
       ) : (
-        <button onClick={() => getSnippets()}>Analyze my emails</button>
+        <>
+          <button onClick={() => getSnippets()}>Analyze my emails</button>
+          <ul style={{ textAlign: "left" }}>
+            {data.map((ele, index) => (
+              <li key={index}>{ele}</li>
+            ))}
+          </ul>
+        </>
       )}
-      <ul style={{ textAlign: "left" }}>
-        {data.map((ele, index) => (
-          <li key={index}>{ele}</li>
-        ))}
-      </ul>
     </div>
   );
 }

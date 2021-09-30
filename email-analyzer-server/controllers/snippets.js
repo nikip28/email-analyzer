@@ -4,6 +4,8 @@ const { Base64 } = require("js-base64");
 
 const getRepetedSnippets = require("../utils");
 
+const EMAIL_COUNT = 10;
+
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"];
 
@@ -35,7 +37,7 @@ function getSnippets(req, res) {
           console.log("Token stored to", TOKEN_PATH);
         });
         try {
-          const data = await listMessages(oAuth2Client, "");
+          const data = await listMessages(oAuth2Client, "label:SENT");
           res.send({ snippets: data });
         } catch (error) {
           console.log("errr", error);
@@ -59,7 +61,7 @@ function authorize(oAuth2Client, res) {
     if (err) return getNewToken(oAuth2Client, res);
     oAuth2Client.setCredentials(JSON.parse(token));
     try {
-      const data = await listMessages(oAuth2Client, "");
+      const data = await listMessages(oAuth2Client, "label:SENT");
       res.send({ snippets: data });
     } catch (error) {
       console.log("errr", error);
@@ -87,7 +89,7 @@ function listMessages(auth, query) {
       {
         userId: "me",
         q: query,
-        maxResults: 5,
+        maxResults: EMAIL_COUNT,
       },
       async (err, res) => {
         if (err) {
@@ -133,10 +135,10 @@ function getMail(msgId, gmail) {
         }
         console.log("no error");
         console.log(res.data.labelIds.INBOX);
-        var body = res.data.payload.parts[0].body.data;
-        var htmlBody = Base64.decode(
-          body.replace(/-/g, "+").replace(/_/g, "/")
-        );
+        let body = res.data.payload.parts[0].body.data;
+        let htmlBody = body
+          ? Base64.decode(body.replace(/-/g, "+").replace(/_/g, "/"))
+          : "";
         resolve(htmlBody);
       }
     );
